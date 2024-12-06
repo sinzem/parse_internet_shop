@@ -2,9 +2,11 @@ require('dotenv').config();
 const puppeteer = require('puppeteer');
 const { findPhoneNumbersInText } = require('libphonenumber-js');
 const parsingRozetkaLinks = require("../parserLinks/rozetkaLinks");
+const rozetkaSettings = require("../siteSettings/rozetkaSettings");
 
 async function parsingRozetkaNumbers(links) {
 
+    const sellerShopName = rozetkaSettings.sellerShopName;
     const sellersArray = [];
 
     if (!links.length) {
@@ -25,7 +27,7 @@ async function parsingRozetkaNumbers(links) {
         try {
             await page.goto(url);
             let seller = [];
-            let title = await page.$eval(".seller__heading.ng-star-inserted", e => e.textContent.trim().split(" ").slice(1).join(" "));
+            let title = await page.$eval(sellerShopName, e => e.textContent.trim().split(" ").slice(1).join(" "));
             seller.push(title);
             let body = await page.$eval("body", e => e.innerHTML);
             let arr = findPhoneNumbersInText(body);
