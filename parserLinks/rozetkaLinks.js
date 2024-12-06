@@ -11,7 +11,6 @@ async function parsingRozetkaLinks(url, searchRequest, pagesToParse) {
     let searchButton = rozetkaSettings.searchButton;
     let productCardSelector = rozetkaSettings.productCardSelector;
     let nextButtonSelector = rozetkaSettings.nextButtonSelector;
-    let anotherSellersRuButtonSelector = rozetkaSettings.anotherSellersRuButtonSelector;
     let anotherSellersUaButtonSelector = rozetkaSettings.anotherSellersUaButtonSelector;
     let linkToSellerPageSelector = rozetkaSettings.linkToSellerPageSelector;
     let linksArray = [];
@@ -30,24 +29,22 @@ async function parsingRozetkaLinks(url, searchRequest, pagesToParse) {
     await new Promise(resolve => { setTimeout(resolve, middleInterval)});
     await page.type(searchInput, searchRequest, {delay: 120});
     await page.click(searchButton);
-    await new Promise(resolve => { setTimeout(resolve, bigInterval)});
+    await new Promise(resolve => { setTimeout(resolve, littleInterval)});
 
-    let anotherSellersRuButton = await page.$(anotherSellersRuButtonSelector);
-    let anotherSellersUaButton = await page.$(anotherSellersUaButtonSelector);
-
-    if (anotherSellersRuButton) {
-        await anotherSellersRuButton.click();
-    } else if (anotherSellersUaButton) {
+    try {
+        await page.waitForSelector(anotherSellersUaButtonSelector, {timeout: 10000});
+        let anotherSellersUaButton = await page.$(anotherSellersUaButtonSelector);
         await anotherSellersUaButton.click();
-    } else {
+    } catch (e) {
         await browser.close();
-        return linksArray;
+        console.log(`This product is sold only by Rozetka, or there is a connection error: ${e}`);
+        return {linksArray, message: `This product is sold only by Rozetka, or there is a connection error: ${e}`};
     }
 
-    await new Promise(resolve => { setTimeout(resolve, bigInterval)});
+    await new Promise(resolve => { setTimeout(resolve, littleInterval)});
 
     while(pagesToParse) {
-        // await new Promise(resolve => { setTimeout(resolve, littleInterval)});
+        await new Promise(resolve => { setTimeout(resolve, littleInterval)});
         let arr = await page.evaluate((selector) => {
             let arr = Array.from(document.querySelectorAll(selector), e => e.href);
             return arr;
@@ -66,11 +63,11 @@ async function parsingRozetkaLinks(url, searchRequest, pagesToParse) {
         await browser.close();
         return linksArray;
     } else {
-        try {
-            while (linksArray.length) {
+        while (linksArray.length) {
+            try {
                 let url = linksArray.pop();
                 await page.goto(url);
-                await page.waitForSelector(linkToSellerPageSelector);
+                await page.waitForSelector(linkToSellerPageSelector, {timeout: 10000});
                 let title = await page.evaluate(async (selector) => {
                     let b = document.querySelector(selector)
                     return b.href;
@@ -78,16 +75,16 @@ async function parsingRozetkaLinks(url, searchRequest, pagesToParse) {
                 if (!sellersLinks.includes(title)) {
                     sellersLinks.push(title);
                 }
+            } catch (e) {
+                console.log({message: `Broken link: ${e}`});
             }
-        } catch (e) {
-            console.log({message: `Failed to get seller links: ${e}`});
         }
     }
 
     await browser.close();
-    console.log(sellersLinks);
+    // console.log(sellersLinks);
     return sellersLinks;
 };
-parsingRozetkaLinks("https://rozetka.com.ua/", "детские игрушки", 2).then((e) => console.log(e));
+// parsingRozetkaLinks("https://rozetka.com.ua/", "Покривало IDEIA Cube двостороннє 140х210 Антиалергенне", 5).then((e) => console.log(e));
 
 module.exports = parsingRozetkaLinks;

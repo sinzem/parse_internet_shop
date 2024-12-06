@@ -3,29 +3,46 @@ const fs = require("fs");
 const path = require("path");
 const puppeteer = require('puppeteer');
 const { findPhoneNumbersInText } = require('libphonenumber-js');
+const rozetkaSettings = require("./siteSettings/rozetkaSettings");
 
-async function parser(url) {
+let links = [
+    'https://rozetka.com.ua/ua/451874729/p451874729/',
+    'https://rozetka.com.ua/ua/451874708/p451874708/',
+    'https://rozetka.com.ua/ua/451874720/p451874720/',
+    'https://rozetka.com.ua/ua/ergo-43gus8500/p362684409/',
+    'https://rozetka.com.ua/ua/451874741/p451874741/',
+
+  ]
+
+async function parser(links) {
    
     const browser = await puppeteer.launch({
         headless: false
     });
     const page = await browser.newPage();
-    await page.goto(url);
+    // await page.goto(url);
     await page.setViewport({
         width: 1200,
         height: 800
     });
-    let linkToSellerPageSelector = ".seller-title > .min-w-0.ng-star-inserted > .ng-star-inserted";
-    await page.waitForSelector(linkToSellerPageSelector);
-    let title = await page.$(linkToSellerPageSelector);
-    let a = await page.evaluate(async (x) => {
-        let b = document.querySelector(x)
-        return b.href;
-    }, linkToSellerPageSelector)
-    // let b = await page.$(linkToSellerPageSelector);
-    // let a = await b.href;
-    console.log(await a);
-
+    let sellersLinks = [];
+    let linkToSellerPageSelector = rozetkaSettings.linkToSellerPageSelector;
+    while (links.length) {
+        try {
+            let url = links.pop();
+            await page.goto(url);
+            await page.waitForSelector(linkToSellerPageSelector, {timeout: 10000});
+            let title = await page.evaluate(async (selector) => {
+                let b = document.querySelector(selector)
+                return b.href;
+            }, linkToSellerPageSelector)
+            if (!sellersLinks.includes(title)) {
+                sellersLinks.push(title);
+            }
+        } catch (e) {
+            console.log({message: `Broken link: ${e}`});
+        }
+    }
     // let a = await page.$(".title__font.ng-star-inserted")
     // await console.log(a.textContent);
 
@@ -43,7 +60,7 @@ async function parser(url) {
     // let arr = findPhoneNumbersInText(a.ar)
     
     // await browser.close();
-    return /* arr */;
+    return sellersLinks;
 };
-parser("https://rozetka.com.ua/ua/451874729/p451874729/");
+parser(links).then((l) => console.log(l));
 // module.exports = parser;
