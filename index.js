@@ -18,7 +18,7 @@ const rozetkaNumbers = require("./parserNumbers/rozetkaNumbers");
 
 async function parser(/* links */) {
     let arr = [];
-    rozetkaLinks("https://rozetka.com.ua/", "детские игрушки", 2)
+    rozetkaLinks("https://rozetka.com.ua/", "телевизор", 1)
         .then((links) => rozetkaNumbers(links))
         .then((nums) => {
             fs.writeFileSync(path.resolve(__dirname, "sellers.json"), JSON.stringify(nums));
@@ -73,5 +73,6 @@ async function parser(/* links */) {
 
     return arr;
 };
+
 parser(/* links */).then((l) => console.log(l));
 // module.exports = parser;
