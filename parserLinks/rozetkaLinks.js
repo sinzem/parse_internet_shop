@@ -29,19 +29,18 @@ async function parsingRozetkaLinks(url, searchRequest, pagesToParse) {
     await new Promise(resolve => { setTimeout(resolve, middleInterval)});
     await page.type(searchInput, searchRequest, {delay: 120});
     await page.click(searchButton);
-    await new Promise(resolve => { setTimeout(resolve, littleInterval)});
-
+    
     try {
+        await new Promise(resolve => { setTimeout(resolve, bigInterval)});
         await page.waitForSelector(anotherSellersUaButtonSelector, {timeout: 10000});
         let anotherSellersUaButton = await page.$(anotherSellersUaButtonSelector);
         await anotherSellersUaButton.click();
+        await new Promise(resolve => { setTimeout(resolve, bigInterval)});
     } catch (e) {
         await browser.close();
         console.log(`This product is sold only by Rozetka, or there is a connection error: ${e}`);
         return {linksArray, message: `This product is sold only by Rozetka, or there is a connection error: ${e}`};
     }
-
-    await new Promise(resolve => { setTimeout(resolve, littleInterval)});
 
     while(pagesToParse) {
         await new Promise(resolve => { setTimeout(resolve, littleInterval)});

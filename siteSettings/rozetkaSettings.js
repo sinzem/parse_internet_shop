@@ -1,7 +1,7 @@
 const rozetkaSettings = {
     littleInterval: 1000,
     middleInterval: 3000, 
-    bigInterval: 5000,
+    bigInterval: 6000,
     searchInput: ".search-form__input.ng-untouched.ng-pristine.ng-valid",
     searchButton: ".button.button_color_green.button_size_medium.search-form__submit",
     productCardSelector: "a.product-link.goods-tile__picture",
