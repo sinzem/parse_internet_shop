@@ -57,7 +57,7 @@ async function parsingRozetkaLinks(url, searchRequest, pagesToParse) {
             pagesToParse = 0;
         }
     }
-
+    console.log(linksArray.length);
     if (!linksArray.length) {
         await browser.close();
         return linksArray;
@@ -73,6 +73,7 @@ async function parsingRozetkaLinks(url, searchRequest, pagesToParse) {
                 }, linkToSellerPageSelector)
                 if (!sellersLinks.includes(title)) {
                     sellersLinks.push(title);
+                    console.log(title);
                 }
             } catch (e) {
                 console.log({message: `Broken link: ${e}`});
