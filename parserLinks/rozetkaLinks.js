@@ -3,15 +3,11 @@ const puppeteer = require('puppeteer');
 const rozetkaSettings = require("../siteSettings/rozetkaSettings");
 
 async function parsingRozetkaLinks(siteName, searchRequest, pagesToParse) {
-
-    let url;
-    if (siteName.toLowerCase() === "розетка" || siteName.toLowerCase() === "rozetka") {
-        url = rozetkaSettings.startPageUrl;
-    }
  
     const littleInterval = rozetkaSettings.littleInterval;
     const middleInterval = rozetkaSettings.middleInterval;
     const bigInterval = rozetkaSettings.bigInterval;
+    const otherSellersInterval = rozetkaSettings.otherSellersInterval;
     let searchInput = rozetkaSettings.searchInput;
     let searchButton = rozetkaSettings.searchButton;
     let productCardSelector = rozetkaSettings.productCardSelector;
@@ -21,6 +17,11 @@ async function parsingRozetkaLinks(siteName, searchRequest, pagesToParse) {
     let linkToSellerPageSelector = rozetkaSettings.linkToSellerPageSelector;
     let linksArray = [];
     let sellersLinks = [];
+
+    let url;
+    if (siteName.toLowerCase() === "розетка" || siteName.toLowerCase() === "rozetka") {
+        url = rozetkaSettings.startPageUrl;
+    }
    
     const browser = await puppeteer.launch({
         headless: false
@@ -36,7 +37,8 @@ async function parsingRozetkaLinks(siteName, searchRequest, pagesToParse) {
     await page.type(searchInput, searchRequest, {delay: 120});
     await page.click(searchButton);
 
-    await new Promise(resolve => { setTimeout(resolve, 12000)});
+    await new Promise(resolve => { setTimeout(resolve, otherSellersInterval)});
+
     try {
         let confirmAge = await page.$(confirmAgeButton);
         await confirmAge.click();
@@ -97,6 +99,6 @@ async function parsingRozetkaLinks(siteName, searchRequest, pagesToParse) {
     console.log(sellersLinks);
     return sellersLinks;
 };
-parsingRozetkaLinks("Rozetka", "iphone", 5).then((e) => console.log(e));
+// parsingRozetkaLinks("Rozetka", "ножи", 5).then((e) => console.log(e));
 
 module.exports = parsingRozetkaLinks;
