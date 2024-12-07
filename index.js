@@ -18,12 +18,13 @@ const rozetkaNumbers = require("./parserNumbers/rozetkaNumbers");
 
 async function parser(/* links */) {
     let arr = [];
-    rozetkaLinks("https://rozetka.com.ua/", "телевизор", 1)
+    console.log(new Date())
+    rozetkaLinks("https://rozetka.com.ua/", "детские игрушки", 15)
         .then((links) => rozetkaNumbers(links))
         .then((nums) => {
             fs.writeFileSync(path.resolve(__dirname, "sellers.json"), JSON.stringify(nums));
             arr = [...arr, ...nums];
-        }).catch((e) => console.log(e))
+        }).then(() => console.log(new Date())).catch((e) => console.log(e))
     
     // const browser = await puppeteer.launch({
     //     headless: false

@@ -2,8 +2,13 @@ require('dotenv').config();
 const puppeteer = require('puppeteer');
 const rozetkaSettings = require("../siteSettings/rozetkaSettings");
 
-async function parsingRozetkaLinks(url, searchRequest, pagesToParse) {
+async function parsingRozetkaLinks(siteName, searchRequest, pagesToParse) {
 
+    let url;
+    if (siteName.toLowerCase() === "розетка" || siteName.toLowerCase() === "rozetka") {
+        url = rozetkaSettings.startPageUrl;
+    }
+ 
     const littleInterval = rozetkaSettings.littleInterval;
     const middleInterval = rozetkaSettings.middleInterval;
     const bigInterval = rozetkaSettings.bigInterval;
@@ -11,6 +16,7 @@ async function parsingRozetkaLinks(url, searchRequest, pagesToParse) {
     let searchButton = rozetkaSettings.searchButton;
     let productCardSelector = rozetkaSettings.productCardSelector;
     let nextButtonSelector = rozetkaSettings.nextButtonSelector;
+    let confirmAgeButton = rozetkaSettings.confirmAge;
     let anotherSellersUaButtonSelector = rozetkaSettings.anotherSellersUaButtonSelector;
     let linkToSellerPageSelector = rozetkaSettings.linkToSellerPageSelector;
     let linksArray = [];
@@ -29,10 +35,16 @@ async function parsingRozetkaLinks(url, searchRequest, pagesToParse) {
     await new Promise(resolve => { setTimeout(resolve, middleInterval)});
     await page.type(searchInput, searchRequest, {delay: 120});
     await page.click(searchButton);
-    
+
+    await new Promise(resolve => { setTimeout(resolve, 12000)});
     try {
-        await new Promise(resolve => { setTimeout(resolve, bigInterval)});
-        await page.waitForSelector(anotherSellersUaButtonSelector, {timeout: 10000});
+        let confirmAge = await page.$(confirmAgeButton);
+        await confirmAge.click();
+    } catch (e) {
+        console.log({message: `Age confirmation button not found: ${e}`})
+    }
+    try {
+        await page.waitForSelector(anotherSellersUaButtonSelector, {timeout: 12000});
         let anotherSellersUaButton = await page.$(anotherSellersUaButtonSelector);
         await anotherSellersUaButton.click();
         await new Promise(resolve => { setTimeout(resolve, bigInterval)});
@@ -82,9 +94,9 @@ async function parsingRozetkaLinks(url, searchRequest, pagesToParse) {
     }
 
     await browser.close();
-    // console.log(sellersLinks);
+    console.log(sellersLinks);
     return sellersLinks;
 };
-// parsingRozetkaLinks("https://rozetka.com.ua/", "Покривало IDEIA Cube двостороннє 140х210 Антиалергенне", 5).then((e) => console.log(e));
+parsingRozetkaLinks("Rozetka", "iphone", 5).then((e) => console.log(e));
 
 module.exports = parsingRozetkaLinks;
