@@ -99,6 +99,6 @@ async function parsingRozetkaLinks(siteName, searchRequest, pagesToParse) {
     console.log(sellersLinks);
     return sellersLinks;
 };
-// parsingRozetkaLinks("Rozetka", "ножи", 5).then((e) => console.log(e));
+parsingRozetkaLinks("Rozetka", "ножи", 2).then((e) => console.log(e));
 
 module.exports = parsingRozetkaLinks;

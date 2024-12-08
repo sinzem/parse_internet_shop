@@ -46,7 +46,7 @@ async function parsingRozetkaNumbers(links) {
     await browser.close();
     return sellersArray;
 };
-// parsingRozetkaLinks("https://rozetka.com.ua/", "детские игрушки", 2).then((links) => parsingRozetkaNumbers(links)).then(arr => console.log(arr));
+parsingRozetkaLinks("https://rozetka.com.ua/", "игрушки детские", 2).then((links) => parsingRozetkaNumbers(links)).then(arr => console.log(arr));
 // parsingRozetkaNumbers(links).then(arr => console.log(arr));
 
 module.exports = parsingRozetkaNumbers;
