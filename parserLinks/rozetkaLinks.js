@@ -2,7 +2,7 @@ require('dotenv').config();
 const puppeteer = require('puppeteer');
 const rozetkaSettings = require("../siteSettings/rozetkaSettings");
 
-async function parsingRozetkaLinks(siteName, searchRequest, pagesToParse) {
+async function parsingRozetkaLinks(siteName, pagesToParse, searchRequest) {
  
     const littleInterval = rozetkaSettings.littleInterval;
     const middleInterval = rozetkaSettings.middleInterval;
@@ -99,6 +99,6 @@ async function parsingRozetkaLinks(siteName, searchRequest, pagesToParse) {
     console.log(sellersLinks);
     return sellersLinks;
 };
-parsingRozetkaLinks("Rozetka", "ножи", 2).then((e) => console.log(e));
+// parsingRozetkaLinks("Rozetka", 2, "ножи").then((e) => console.log(e));
 
 module.exports = parsingRozetkaLinks;

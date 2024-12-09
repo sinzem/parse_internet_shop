@@ -1,79 +1,126 @@
 require('dotenv').config();
 const fs = require("fs");
 const path = require("path");
-const puppeteer = require('puppeteer');
-const { findPhoneNumbersInText } = require('libphonenumber-js');
-const rozetkaSettings = require("./siteSettings/rozetkaSettings");
-const rozetkaLinks = require("./parserLinks/rozetkaLinks");
-const rozetkaNumbers = require("./parserNumbers/rozetkaNumbers");
+const readline = require("readline");
+const  { TelegramClient, Api } = require("telegram");
+const { StringSession } = require("telegram/sessions");
+const { NewMessage } = require('telegram/events');
+const startParsing = require("./startParsing/startParsing");
 
-// let links = [
-//     'https://rozetka.com.ua/ua/451874729/p451874729/',
-//     'https://rozetka.com.ua/ua/451874708/p451874708/',
-//     'https://rozetka.com.ua/ua/451874720/p451874720/',
-//     'https://rozetka.com.ua/ua/ergo-43gus8500/p362684409/',
-//     'https://rozetka.com.ua/ua/451874741/p451874741/',
+const apiId = Number(process.env.API_ID); /* (Сan be obtained when registering the application on https://my.telegram.org/auth) */
+const apiHash = process.env.API_HASH; /* (Сan be obtained when registering the application on https://my.telegram.org/auth) */
+const adminsId = (process.env.ADMINS_ID).split(","); /* (Line with telegram id of users who can start parsing) */
+const checkedSites = (process.env.CHECKED_SITES).split(","); /* (String with the names of sites for parsing, for example "prom,olx,rozetka") */
+const chatId = process.env.CHAT_ID; /* (ID of the chat where the data will be displayed) */
 
-//   ]
+const stringSession = new StringSession(process.env.TG_SESSION); /* (Connection hash, copy from the console after the first successful connection) */
 
-async function parser(/* links */) {
-    let arr = [];
-    console.log(new Date())
-    rozetkaLinks("https://rozetka.com.ua/", "детские игрушки", 15)
-        .then((links) => rozetkaNumbers(links))
-        .then((nums) => {
-            fs.writeFileSync(path.resolve(__dirname, "sellers.json"), JSON.stringify(nums));
-            arr = [...arr, ...nums];
-        }).then(() => console.log(new Date())).catch((e) => console.log(e))
-    
-    // const browser = await puppeteer.launch({
-    //     headless: false
-    // });
-    // const page = await browser.newPage();
-    // // await page.goto(url);
-    // await page.setViewport({
-    //     width: 1200,
-    //     height: 800
-    // });
-    // let sellersLinks = [];
-    // let linkToSellerPageSelector = rozetkaSettings.linkToSellerPageSelector;
-    // while (links.length) {
-    //     try {
-    //         let url = links.pop();
-    //         await page.goto(url);
-    //         await page.waitForSelector(linkToSellerPageSelector, {timeout: 10000});
-    //         let title = await page.evaluate(async (selector) => {
-    //             let b = document.querySelector(selector)
-    //             return b.href;
-    //         }, linkToSellerPageSelector)
-    //         if (!sellersLinks.includes(title)) {
-    //             sellersLinks.push(title);
-    //         }
-    //     } catch (e) {
-    //         console.log({message: `Broken link: ${e}`});
-    //     }
-    // }
-    // let a = await page.$(".title__font.ng-star-inserted")
-    // await console.log(a.textContent);
-
-    // let a = await page.evaluate(async () => {
-    //     let shorts = document.querySelectorAll("body");
-    //     let ar = shorts[0].innerHTML;
-
-    //     let ids = document.querySelectorAll(".product-link.goods-tile__heading")
-    //     let idsArr = []
-    //     ids.forEach(i => {
-    //         idsArr.push(i.href.split("/")[5])})
-    //     return {ar, idsArr};
-    // })
-
-    // let arr = findPhoneNumbersInText(a.ar)
-    
-    // await browser.close();
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
 
-    return arr;
+const telegramClient = async () => {
+
+    const client = new TelegramClient(stringSession, apiId, apiHash, {
+        connectionRetries: 5,
+    });
+    // --------------------------------------
+    // When you first connect, you need to enter your phone number, code and confirmation code (will come in a message), the connection hash will be displayed in the console, copy it to stringSession for further connections
+    await client.start({
+        phoneNumber: process.env.MY_PHONE,
+        password: process.env.MY_PASSWORD,
+        phoneCode: async () =>
+        new Promise((resolve) =>
+            rl.question("Please enter the code you received: ", resolve)
+        ),
+        onError: (err) => console.log(err),
+    });
+    console.log("You should now be connected.");
+    console.log(client.session.save());  /* (when connecting for the first time, enter in stringSession) */
+    // --------------------------------------
+    //  Message handler will start parsing and sending. The message should consist of the name of the site, the number of pages being checked and the name of the product (example: розетка 10 детские игрушки)
+    client.addEventHandler(async (event) => {
+    const message = event.message;
+    if(message.peerId.channelId == chatId 
+        && (!message.fromId 
+        || adminsId.includes(String(message.fromId.userId)))) {
+        const queryArray = message.message.split(" ");
+        const siteName = queryArray[0].toLowerCase();
+        const numberOfPages = Number(queryArray[1]);
+        const itemToCheck = queryArray.slice(2).join(" ")
+        if (checkedSites.includes(siteName) && Number.isInteger(numberOfPages) && numberOfPages > 0) {
+            await startParsing(siteName, numberOfPages, itemToCheck)
+                .then(async (arr) => {
+                    while(arr.length) {
+                        let shop = arr.pop();
+                        await sendMessage(client, shop)
+                    }
+            });
+        }
+        };
+    }, new NewMessage({}))
 };
 
-parser(/* links */).then((l) => console.log(l));
-// module.exports = parser;
+telegramClient();
+
+
+
+async function sendMessage(client, data) {
+    let title = data.shift();
+    let message = `${title} \n
+                    \n`;
+
+    while(data.length) {
+        let number = data.pop();
+        try {
+            let sellerObject = await getSellerInfo(client, number); 
+            message += `phone: ${sellerObject.phone}\n 
+                        firstName: ${sellerObject.firstName} \n
+                        lastName: ${sellerObject.lastName} \n
+                        nickName: ${sellerObject.username} \n
+                        id: ${sellerObject.id} \n
+                        \n`;
+        } catch (e) {
+            console.log({message: `Number not found in database: ${e}`});
+            message += `phone: ${number}\n
+                        The number is not connected to telegram\n
+                        \n`;
+        }
+    }
+    
+    try {
+        const entity = await client.getEntity(process.env.CHAT_NAME);
+        await client.invoke(new Api.messages.SendMessage({
+            peer: entity,
+            message: message
+        }))
+    } catch (e) {
+        console.log({message: `Error sending message: ${e}`});
+    }
+}
+
+
+async function getSellerInfo(client, number) {
+    try {
+        await client.connect();
+        const result = await client.invoke(
+          new Api.contacts.ResolvePhone({
+            phone: number,
+          })
+        );
+        let data = {
+          id: Number(result.users[0].id.value),
+          firstName: result.users[0].firstName,
+          lastName: result.users[0].lastName,
+          username: result.users[0].username,
+          phone: result.users[0].phone
+        }; 
+        // await client.disconnect();
+        return data;
+    } catch (e) {
+        console.log({message: `Failed to process the number. Error: ${e}`});
+        return {};
+    }
+}
