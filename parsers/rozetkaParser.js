@@ -1,26 +1,29 @@
 require('dotenv').config();
 const puppeteer = require('puppeteer');
-const rozetkaSettings = require("../siteSettings/rozetkaSettings");
+const { findPhoneNumbersInText } = require('libphonenumber-js');
+const {startPageUrl,
+        littleInterval,
+        middleInterval,
+        bigInterval,
+        otherSellersInterval,
+        searchInput,
+        searchButton,
+        productCardSelector,
+        nextButtonSelector,
+        confirmAgeButton,
+        anotherSellersUaButtonSelector,
+        linkToSellerPageSelector,
+        sellerShopName} = require("../siteSettings/rozetkaSettings");
 
-async function parsingRozetkaLinks(siteName, pagesToParse, searchRequest) {
+async function parsingRozetkaNumbers(siteName, pagesToParse, searchRequest) {
  
-    const littleInterval = rozetkaSettings.littleInterval;
-    const middleInterval = rozetkaSettings.middleInterval;
-    const bigInterval = rozetkaSettings.bigInterval;
-    const otherSellersInterval = rozetkaSettings.otherSellersInterval;
-    let searchInput = rozetkaSettings.searchInput;
-    let searchButton = rozetkaSettings.searchButton;
-    let productCardSelector = rozetkaSettings.productCardSelector;
-    let nextButtonSelector = rozetkaSettings.nextButtonSelector;
-    let confirmAgeButton = rozetkaSettings.confirmAge;
-    let anotherSellersUaButtonSelector = rozetkaSettings.anotherSellersUaButtonSelector;
-    let linkToSellerPageSelector = rozetkaSettings.linkToSellerPageSelector;
     let linksArray = [];
     let sellersLinks = [];
+    const sellersArray = [];
 
     let url;
     if (siteName.toLowerCase() === "розетка" || siteName.toLowerCase() === "rozetka") {
-        url = rozetkaSettings.startPageUrl;
+        url = startPageUrl;
     }
    
     const browser = await puppeteer.launch({
@@ -95,10 +98,31 @@ async function parsingRozetkaLinks(siteName, pagesToParse, searchRequest) {
         }
     }
 
-    await browser.close();
-    console.log(sellersLinks);
-    return sellersLinks;
-};
-// parsingRozetkaLinks("Rozetka", 2, "ножи").then((e) => console.log(e));
+    while (sellersLinks.length) {
+        let url = sellersLinks.shift();
+        try {
+            await page.goto(url);
+            let seller = [];
+            let title = await page.$eval(sellerShopName, e => e.textContent.trim().split(" ").slice(1).join(" "));
+            seller.push(title);
+            let body = await page.$eval("body", e => e.innerHTML);
+            let arr = findPhoneNumbersInText(body);
+            arr.forEach(i => {
+                if (i.number.number[4] !== "4") {
+                    seller.push(i.number.number)
+                }
+            })
+            console.log(seller);
+            sellersArray.push(seller);
+        } catch (e) {
+            console.log({message: `Broken link: error ${e}`});
+        }
+    }
 
-module.exports = parsingRozetkaLinks;
+    await browser.close();
+
+    return sellersArray;
+};
+// parsingRozetkaLinks("Rozetka", 1, "ножи").then((e) => console.log(e));
+
+module.exports = parsingRozetkaNumbers;
