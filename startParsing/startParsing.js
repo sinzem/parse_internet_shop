@@ -23,4 +23,3 @@ async function startParsing(siteName, numberOfPages, itemToCheck) {
 }
 
 module.exports = startParsing;
-// rozetkaLinks(siteName, numberOfPages, itemToCheck).then((arr) => console.log(arr))

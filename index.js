@@ -34,7 +34,7 @@ const telegramClient = async () => {
         password: process.env.MY_PASSWORD,
         phoneCode: async () =>
         new Promise((resolve) =>
-            rl.question("Please enter the code you received: ", resolve)
+            rl.question("Please enter the code you received: ", resolve) /* (Сonfirmation code will be sent to your phone, you need to enter it in the terminal as an answer to this question) */
         ),
         onError: (err) => console.log(err),
     });
