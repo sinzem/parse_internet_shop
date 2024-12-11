@@ -8,7 +8,7 @@ const olxSettings = {
     searchButton: '[data-testid="search-submit"]',
     productCardSelector: '[data-cy="ad-card-title"] > a',
     nextButtonSelector: '[data-cy="pagination-forward"]',
-    showPhoneButton: '[data-testid="ad-contact-message-button"]',
+    showPhoneButton: '[data-testid="ad-contact-phone"]',
     contactPhone: '[data-testid="contact-phone"].css-v1ndtc',
     sellerName: 'h4.css-1lcz6o7'
 }

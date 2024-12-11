@@ -60,6 +60,7 @@ async function parsingPromNumbers(siteName, pagesToParse, searchRequest) {
        
         arr.forEach(e => {
             if (!linksArray.includes(e)) {
+                console.log(e);
                 linksArray.push(e);
             }
         })
@@ -96,12 +97,13 @@ async function parsingPromNumbers(siteName, pagesToParse, searchRequest) {
         }
 
         if (sellerData.length) {
+            console.log(sellerData);
             sellersData.push(sellerData);
         }
     }
     
     await browser.close();
-    console.log(sellersData);
+    
     return sellersData;
 };
 // parsingPromNumbers("пром", 2, "покрывало").then((e) => console.log(e));

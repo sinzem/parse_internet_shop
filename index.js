@@ -80,12 +80,12 @@ async function sendMessage(client, data, idForAnswer) {
         try {
             let sellerObject = await getSellerInfo(client, number); 
             message += `number from site: ${number}\n
-                phone: ${sellerObject.phone}\n 
-                firstName: ${sellerObject.firstName} \n
-                lastName: ${sellerObject.lastName} \n
-                nickName: ${sellerObject.username} \n
-                id: ${sellerObject.id} \n
-                \n`;
+            phone: ${sellerObject.phone}\n 
+            firstName: ${sellerObject.firstName} \n
+            lastName: ${sellerObject.lastName} \n
+            nickName: ${sellerObject.username} \n
+            id: ${sellerObject.id} \n
+            \n`;
             await new Promise(resolve => { setTimeout(resolve, 1000)});
         } catch (e) {
             console.log({message: `Number not found in database: ${e}`});

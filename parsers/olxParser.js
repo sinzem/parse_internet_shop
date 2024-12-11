@@ -1,24 +1,27 @@
 require('dotenv').config();
 const puppeteer = require('puppeteer');
-const olxSettings = require("../siteSettings/olxSettings");
+const {startPageUrl,
+        littleInterval,
+        middleInterval,
+        bigInterval,
+        otherSellersInterval,
+        searchInput,
+        searchButton,
+        productCardSelector,
+        nextButtonSelector,
+        showPhoneButton,
+        contactPhone,
+        sellerName} = require("../siteSettings/olxSettings");
 
 
 async function parsingOlxNumbers(siteName, pagesToParse, searchRequest) {
 
-    const littleInterval = olxSettings.littleInterval;
-    const middleInterval = olxSettings.middleInterval;
-    const bigInterval = olxSettings.bigInterval;
-    const otherSellersInterval = olxSettings.otherSellersInterval;
-    let searchInput = olxSettings.searchInput;
-    let searchButton = olxSettings.searchButton;
-    let productCardSelector = olxSettings.productCardSelector;
-    let nextButtonSelector = olxSettings.nextButtonSelector;
-
     let linksArray = [];
+    let sellersData = [];
 
     let url;
     if (siteName.toLowerCase() === "олх" || siteName.toLowerCase() === "olx") {
-        url = olxSettings.startPageUrl;
+        url = startPageUrl;
     }
    
     const browser = await puppeteer.launch({
@@ -37,7 +40,7 @@ async function parsingOlxNumbers(siteName, pagesToParse, searchRequest) {
     await new Promise(resolve => { setTimeout(resolve, middleInterval)});
 
     while(pagesToParse) {
-        await new Promise(resolve => { setTimeout(resolve, littleInterval)});
+        await new Promise(resolve => { setTimeout(resolve, middleInterval)});
         let arr = await page.evaluate((selector) => {
             let arr = Array.from(document.querySelectorAll(selector), e => e.href);
             return arr;
@@ -51,10 +54,31 @@ async function parsingOlxNumbers(siteName, pagesToParse, searchRequest) {
             pagesToParse = 0;
         }
     }
-    // let body = await page.$eval("body", e => e.innerHTML);
-    // let arr = findPhoneNumbersInText(body);
-    return linksArray;
+    
+    while(linksArray.length) {
+        let url = linksArray.pop();
+        let sellerData = [];
+        try {
+            await page.goto(url);
+            await page.waitForSelector(showPhoneButton, {timeout: 5000});
+            await new Promise(resolve => { setTimeout(resolve, littleInterval)});
+            let button = await page.$(showPhoneButton);
+            let name = await page.$eval(sellerName, e => e.textContent);
+            name ? sellerData.push(name) : sellerData.push("No name");
+            await button.click();
+            await page.waitForSelector(contactPhone, {timeout: 5000});
+            let rawPhone = await page.$eval(contactPhone, e => e.textContent);
+            let phoneNumber = rawPhone.split(" ").join("").split("-").join("");
+            phoneNumber.length === 10 ? phoneNumber = "+38" + phoneNumber : null;
+            phoneNumber ? sellerData.push(phoneNumber) : null;
+        } catch (e) {
+            console.log({message: `Wrong link: ${e}`});
+        }
+        sellerData.length ? sellersData.push(sellerData) : null;
+    }
+    console.log(linksArray.length);
+    return sellersData;
 };
-parsingOlxNumbers("olx", 2, "ножи").then((e) => console.log(e));
+// parsingOlxNumbers("olx", 1, "автомобиль").then((e) => console.log(e));
 
 module.exports = parsingOlxNumbers;
