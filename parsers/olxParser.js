@@ -25,7 +25,8 @@ async function parsingOlxNumbers(siteName, pagesToParse, searchRequest) {
     }
    
     const browser = await puppeteer.launch({
-        headless: false
+        headless: false,
+        args: ['--proxy-server=socks5://127.0.0.1:9050'],
     });
     const page = await browser.newPage();
     await page.goto(url);
@@ -55,8 +56,11 @@ async function parsingOlxNumbers(siteName, pagesToParse, searchRequest) {
         }
     }
     
+    console.log(linksArray.length);
+
     while(linksArray.length) {
         let url = linksArray.pop();
+        console.log(url);
         let sellerData = [];
         try {
             await page.goto(url);
@@ -65,20 +69,25 @@ async function parsingOlxNumbers(siteName, pagesToParse, searchRequest) {
             let button = await page.$(showPhoneButton);
             let name = await page.$eval(sellerName, e => e.textContent);
             name ? sellerData.push(name) : sellerData.push("No name");
-            await button.click();
-            await page.waitForSelector(contactPhone, {timeout: 5000});
-            let rawPhone = await page.$eval(contactPhone, e => e.textContent);
-            let phoneNumber = rawPhone.split(" ").join("").split("-").join("");
-            phoneNumber.length === 10 ? phoneNumber = "+38" + phoneNumber : null;
-            phoneNumber ? sellerData.push(phoneNumber) : null;
+            if (button) {
+                await button.click();
+                await page.waitForSelector(contactPhone, {timeout: 6000});
+                let rawPhone = await page.$eval(contactPhone, e => e.textContent);
+                let phoneNumber = rawPhone.split(" ").join("").split("-").join("");
+                phoneNumber.length === 10 ? phoneNumber = "+38" + phoneNumber : null;
+                phoneNumber.length === 11 ? phoneNumber = "+3" + phoneNumber : null;
+                phoneNumber.length === 12 ? phoneNumber = "+" + phoneNumber : null;
+                phoneNumber ? sellerData.push(phoneNumber) : null;
+            }
         } catch (e) {
             console.log({message: `Wrong link: ${e}`});
         }
         sellerData.length ? sellersData.push(sellerData) : null;
+        console.log(sellerData);
     }
-    console.log(linksArray.length);
+    
     return sellersData;
 };
-// parsingOlxNumbers("olx", 1, "автомобиль").then((e) => console.log(e));
+parsingOlxNumbers("olx", 1, "ножи").then((e) => console.log(e));
 
 module.exports = parsingOlxNumbers;

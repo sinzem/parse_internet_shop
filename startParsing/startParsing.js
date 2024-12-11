@@ -7,7 +7,9 @@ async function startParsing(siteName, numberOfPages, itemToCheck) {
     switch(siteName) {
         case "rozetka":
         case "розетка":
-            arr = await parsingRozetkaNumbers(siteName, numberOfPages, itemToCheck);
+            // arr = await parsingRozetkaNumbers(siteName, numberOfPages, itemToCheck);
+            // return arr;
+           
             return arr;
         case "prom":
         case "пром":

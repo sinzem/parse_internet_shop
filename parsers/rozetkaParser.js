@@ -48,6 +48,13 @@ async function parsingRozetkaNumbers(siteName, pagesToParse, searchRequest) {
     } catch (e) {
         console.log({message: `Age confirmation button not found: ${e}`})
     }
+
+    await new Promise(resolve => { setTimeout(resolve, littleInterval)});
+    // let confirmAge = await page.$(confirmAgeButton);
+    // if (confirmAge) {
+    //     confirmAge.click()
+    // } 
+
     try {
         await page.waitForSelector(anotherSellersUaButtonSelector, {timeout: 12000});
         let anotherSellersUaButton = await page.$(anotherSellersUaButtonSelector);
