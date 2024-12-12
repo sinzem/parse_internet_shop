@@ -57,7 +57,7 @@ async function parsingPromNumbers(siteName, pagesToParse, searchRequest) {
             let arr = Array.from(document.querySelectorAll(selector), e => e.href);
             return arr;
         }, sellerPage, littleInterval)
-       
+       console.log(arr.length);
         arr.forEach(e => {
             if (!linksArray.includes(e)) {
                 console.log(e);
@@ -72,7 +72,8 @@ async function parsingPromNumbers(siteName, pagesToParse, searchRequest) {
             pagesToParse = 0;
         }
     }
-    
+    console.log(linksArray.length);
+
     while (linksArray.length) {
         let link = linksArray.pop();
         let sellerData = []
@@ -106,6 +107,6 @@ async function parsingPromNumbers(siteName, pagesToParse, searchRequest) {
     
     return sellersData;
 };
-// parsingPromNumbers("пром", 2, "покрывало").then((e) => console.log(e));
+// parsingPromNumbers("пром", 1, "водка").then((e) => console.log(e));
 
 module.exports = parsingPromNumbers;

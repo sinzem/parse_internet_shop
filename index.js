@@ -46,13 +46,12 @@ const telegramClient = async () => {
     const message = event.message;
     const groupId = message.peerId.channelId || message.peerId.chatId; /* (for channel or chat/group) */
 
-    console.log(event);
     if(groupId == chatId  && (!message.fromId || adminsId.includes(String(message.fromId.userId)))) {
         const queryArray = message.message.split(" ");
         const siteName = queryArray[0].toLowerCase();
         const numberOfPages = Number(queryArray[1]);
-        const itemToCheck = queryArray.slice(2).join(" ")
-        console.log(siteName, numberOfPages, itemToCheck);
+        const itemToCheck = queryArray.slice(2).join(" ");
+    
         if (checkedSites.includes(siteName) && Number.isInteger(numberOfPages) && numberOfPages > 0) {
             await startParsing(siteName, numberOfPages, itemToCheck)
                 .then(async (arr) => {
@@ -86,7 +85,7 @@ async function sendMessage(client, data, idForAnswer) {
             nickName: ${sellerObject.username} \n
             id: ${sellerObject.id} \n
             \n`;
-            await new Promise(resolve => { setTimeout(resolve, 1000)});
+            await new Promise(resolve => { setTimeout(resolve, randomTime(1000, 2000))});
         } catch (e) {
             console.log({message: `Number not found in database: ${e}`});
             message += `phone: ${number}\n
@@ -102,7 +101,7 @@ async function sendMessage(client, data, idForAnswer) {
             peer: idForAnswer,
             message: message
         }))
-        await new Promise(resolve => { setTimeout(resolve, 1000)});
+        await new Promise(resolve => { setTimeout(resolve, randomTime(1000, 2000))});
     } catch (e) {
         console.log({message: `Error sending message: ${e}`});
     }
@@ -130,4 +129,9 @@ async function getSellerInfo(client, number) {
         console.log({message: `Failed to process the number. Error: ${e}`});
         return {};
     }
+}
+
+function randomTime(min, max) {
+    let rand = min + Math.random() * (max + 1 - min);
+    return Math.floor(rand);
 }

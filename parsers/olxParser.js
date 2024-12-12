@@ -58,36 +58,36 @@ async function parsingOlxNumbers(siteName, pagesToParse, searchRequest) {
     
     console.log(linksArray.length);
 
-    while(linksArray.length) {
-        let url = linksArray.pop();
-        console.log(url);
-        let sellerData = [];
-        try {
-            await page.goto(url);
-            await page.waitForSelector(showPhoneButton, {timeout: 5000});
-            await new Promise(resolve => { setTimeout(resolve, littleInterval)});
-            let button = await page.$(showPhoneButton);
-            let name = await page.$eval(sellerName, e => e.textContent);
-            name ? sellerData.push(name) : sellerData.push("No name");
-            if (button) {
-                await button.click();
-                await page.waitForSelector(contactPhone, {timeout: 6000});
-                let rawPhone = await page.$eval(contactPhone, e => e.textContent);
-                let phoneNumber = rawPhone.split(" ").join("").split("-").join("");
-                phoneNumber.length === 10 ? phoneNumber = "+38" + phoneNumber : null;
-                phoneNumber.length === 11 ? phoneNumber = "+3" + phoneNumber : null;
-                phoneNumber.length === 12 ? phoneNumber = "+" + phoneNumber : null;
-                phoneNumber ? sellerData.push(phoneNumber) : null;
-            }
-        } catch (e) {
-            console.log({message: `Wrong link: ${e}`});
-        }
-        sellerData.length ? sellersData.push(sellerData) : null;
-        console.log(sellerData);
-    }
+    // while(linksArray.length) {
+    //     let url = linksArray.pop();
+    //     console.log(url);
+    //     let sellerData = [];
+    //     try {
+    //         await page.goto(url);
+    //         await page.waitForSelector(showPhoneButton, {timeout: 5000});
+    //         await new Promise(resolve => { setTimeout(resolve, littleInterval)});
+    //         let button = await page.$(showPhoneButton);
+    //         let name = await page.$eval(sellerName, e => e.textContent);
+    //         name ? sellerData.push(name) : sellerData.push("No name");
+    //         if (button) {
+    //             await button.click();
+    //             await page.waitForSelector(contactPhone, {timeout: 6000});
+    //             let rawPhone = await page.$eval(contactPhone, e => e.textContent);
+    //             let phoneNumber = rawPhone.split(" ").join("").split("-").join("");
+    //             phoneNumber.length === 10 ? phoneNumber = "+38" + phoneNumber : null;
+    //             phoneNumber.length === 11 ? phoneNumber = "+3" + phoneNumber : null;
+    //             phoneNumber.length === 12 ? phoneNumber = "+" + phoneNumber : null;
+    //             phoneNumber ? sellerData.push(phoneNumber) : null;
+    //         }
+    //     } catch (e) {
+    //         console.log({message: `Wrong link: ${e}`});
+    //     }
+    //     sellerData.length ? sellersData.push(sellerData) : null;
+    //     console.log(sellerData);
+    // }
     
     return sellersData;
 };
-parsingOlxNumbers("olx", 1, "ножи").then((e) => console.log(e));
+parsingOlxNumbers("olx", 1, "носки").then((e) => console.log(e));
 
 module.exports = parsingOlxNumbers;
