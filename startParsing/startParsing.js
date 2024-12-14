@@ -9,7 +9,8 @@ async function startParsing(siteName, numberOfPages, itemToCheck) {
         case "розетка":
             arr = await parsingRozetkaNumbers(siteName, numberOfPages, itemToCheck);
             return arr;
-           
+            // let arr = [["Sinzem Shop1", "+380995308473", "+30934104512" ], ["Sinzem Shop2", "+380990458112"], ["Sinzem Shop3"]]
+            // return arr;
         case "prom":
         case "пром":
             arr = await parsingPromNumbers(siteName, numberOfPages, itemToCheck);
