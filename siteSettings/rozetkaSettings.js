@@ -4,6 +4,7 @@ const rozetkaSettings = {
     middleInterval: 3000, 
     bigInterval: 6000,
     otherSellersInterval: 12000,  /* ("Other sellers" button takes a very long time to load if there are many sellers) */
+    hideParserWindow: false,
     searchInput: ".search-form__input.ng-untouched.ng-pristine.ng-valid",
     searchButton: ".button.button_color_green.button_size_medium.search-form__submit",
     confirmAgeButton: ".button.button--medium.popup-content__button.button--green.ng-star-inserted",

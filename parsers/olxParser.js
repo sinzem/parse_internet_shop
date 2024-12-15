@@ -13,7 +13,7 @@ const {startPageUrl,
         nextButtonSelector,
         showPhoneButton,
         contactPhone,
-        sellerName} = require("./siteSettings/olxSettings");
+        sellerName} = require("../siteSettings/olxSettings");
 
 
 async function parsingOlxNumbers(siteName, pagesToParse, searchRequest) {
@@ -118,6 +118,6 @@ async function parsingOlxNumbers(siteName, pagesToParse, searchRequest) {
     // --------------------------------------------------
     return sellersData;
 };
-parsingOlxNumbers("olx", 2, "iphone").then((e) => console.log(e));
+parsingOlxNumbers("olx", 3, "автомобиль").then((e) => console.log(e));
 
 module.exports = parsingOlxNumbers;

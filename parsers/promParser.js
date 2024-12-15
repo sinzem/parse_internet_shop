@@ -5,6 +5,7 @@ const {startPageUrl,
     littleInterval,
     middleInterval,
     bigInterval,
+    hideParserWindow,
     searchInput,
     searchButton,
     sellerPage,
@@ -24,7 +25,7 @@ async function parsingPromNumbers(siteName, pagesToParse, searchRequest) {
     }
    
     const browser = await puppeteer.launch({
-        headless: false
+        headless: hideParserWindow
     });
     const page = await browser.newPage();
     await page.goto(url);
@@ -80,8 +81,9 @@ async function parsingPromNumbers(siteName, pagesToParse, searchRequest) {
 
         try {
             await page.goto(link);
-            await page.waitForSelector(contactsButton, {timeout: 15000});
+            let contactsBtn = await page.waitForSelector(contactsButton, {timeout: 15000});
             await new Promise(resolve => { setTimeout(resolve, littleInterval)});
+            await contactsBtn.dispose();
             let name = await page.$eval(sellerName, e => e.textContent);
             sellerData.push(name);
             await page.click(contactsButton);

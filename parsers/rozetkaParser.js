@@ -6,6 +6,7 @@ const {startPageUrl,
         middleInterval,
         bigInterval,
         otherSellersInterval,
+        hideParserWindow,
         searchInput,
         searchButton,
         productCardSelector,
@@ -27,7 +28,7 @@ async function parsingRozetkaNumbers(siteName, pagesToParse, searchRequest) {
     }
    
     const browser = await puppeteer.launch({
-        headless: false
+        headless: hideParserWindow,
     });
     const page = await browser.newPage();
     await page.goto(url);
@@ -50,16 +51,13 @@ async function parsingRozetkaNumbers(siteName, pagesToParse, searchRequest) {
     }
 
     await new Promise(resolve => { setTimeout(resolve, littleInterval)});
-    // let confirmAge = await page.$(confirmAgeButton);
-    // if (confirmAge) {
-    //     confirmAge.click()
-    // } 
-
+  
     try {
-        await page.waitForSelector(anotherSellersUaButtonSelector, {timeout: 12000});
+        let anotherSellBut = await page.waitForSelector(anotherSellersUaButtonSelector, {timeout: 12000});
         let anotherSellersUaButton = await page.$(anotherSellersUaButtonSelector);
         await anotherSellersUaButton.click();
-        await new Promise(resolve => { setTimeout(resolve, bigInterval)});
+        await new Promise(resolve => { setTimeout(resolve, littleInterval)});
+        await anotherSellBut.dispose();
     } catch (e) {
         await browser.close();
         console.log(`This product is sold only by Rozetka, or there is a connection error: ${e}`);
@@ -90,7 +88,7 @@ async function parsingRozetkaNumbers(siteName, pagesToParse, searchRequest) {
             try {
                 let url = linksArray.pop();
                 await page.goto(url);
-                await page.waitForSelector(linkToSellerPageSelector, {timeout: 10000});
+                let sellerPage = await page.waitForSelector(linkToSellerPageSelector, {timeout: 10000});
                 let title = await page.evaluate(async (selector) => {
                     let b = document.querySelector(selector)
                     return b.href;
@@ -99,6 +97,7 @@ async function parsingRozetkaNumbers(siteName, pagesToParse, searchRequest) {
                     sellersLinks.push(title);
                     console.log(title);
                 }
+                await sellerPage.dispose();
             } catch (e) {
                 console.log({message: `Broken link: ${e}`});
             }
@@ -130,6 +129,6 @@ async function parsingRozetkaNumbers(siteName, pagesToParse, searchRequest) {
 
     return sellersArray;
 };
-parsingRozetkaNumbers("Rozetka", 1, "ножи").then((e) => console.log(e));
+parsingRozetkaNumbers("Rozetka", 1, "покрывало").then((e) => console.log(e));
 
 module.exports = parsingRozetkaNumbers;

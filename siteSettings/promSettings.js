@@ -3,6 +3,7 @@ const promSettings = {
     littleInterval: 200,
     middleInterval: 1000, 
     bigInterval: 2000,
+    hideParserWindow: false,
     searchInput: "input.icvvW",
     searchButton: '[data-qaid="search_btn"]',
     sellerPage: '[data-qaid="company_link"]>._0cNvO.jwtUM',
