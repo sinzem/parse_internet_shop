@@ -7,6 +7,7 @@ const {startPageUrl,
         middleInterval,
         bigInterval,
         forCookiesInterval,
+        hideParserWindow,
         searchInput,
         searchButton,
         productCardSelector,
@@ -27,7 +28,7 @@ async function parsingOlxNumbers(siteName, pagesToParse, searchRequest) {
     }
    
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: hideParserWindow,
         args: [ '--proxy-server=socks5://127.0.0.1:9050' ]
     });
     const page = await browser.newPage();
@@ -57,7 +58,6 @@ async function parsingOlxNumbers(siteName, pagesToParse, searchRequest) {
     
     console.log(linksArray.length);
     // --------------------------------------------------
-    await browser.deleteCookie();
     await browser.close();
     while(linksArray.length) {
         let subArr = linksArray.splice(0, 52).reverse();

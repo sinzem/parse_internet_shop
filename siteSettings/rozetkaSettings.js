@@ -1,7 +1,7 @@
 const rozetkaSettings = {
     startPageUrl: "https://rozetka.com.ua/ua",
     littleInterval: 1000,
-    middleInterval: 3000, 
+    middleInterval: 3500, 
     bigInterval: 6000,
     otherSellersInterval: 12000,  /* ("Other sellers" button takes a very long time to load if there are many sellers) */
     hideParserWindow: false,

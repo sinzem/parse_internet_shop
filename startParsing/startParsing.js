@@ -9,7 +9,7 @@ async function startParsing(siteName, numberOfPages, itemToCheck) {
         case "розетка":
             arr = await parsingRozetkaNumbers(siteName, numberOfPages, itemToCheck);
             return arr;
-            
+           
         case "prom":
         case "пром":
             arr = await parsingPromNumbers(siteName, numberOfPages, itemToCheck);
