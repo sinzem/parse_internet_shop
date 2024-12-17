@@ -109,6 +109,6 @@ async function parsingPromNumbers(siteName, pagesToParse, searchRequest) {
     
     return sellersData;
 };
-parsingPromNumbers("пром", 1, "косметика").then((e) => console.log(e));
+// parsingPromNumbers("пром", 1, "косметика").then((e) => console.log(e));
 
 module.exports = parsingPromNumbers;

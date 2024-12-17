@@ -129,6 +129,6 @@ async function parsingRozetkaNumbers(siteName, pagesToParse, searchRequest) {
 
     return sellersArray;
 };
-parsingRozetkaNumbers("Rozetka", 1, "покрывало").then((e) => console.log(e));
+// parsingRozetkaNumbers("Rozetka", 1, "покрывало").then((e) => console.log(e));
 
 module.exports = parsingRozetkaNumbers;
